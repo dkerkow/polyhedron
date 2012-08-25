@@ -12,5 +12,9 @@ Structure
 
 We think of polyhedron as a server, that manages users and project accounts, and gives the user the ability to manage the geodata that are stored in a PostGIS DB.
 
+The server also handles the backends, which allow the user to analyze and visualize the content and metadata in the DB.
+For the statistical part of the backend, R seems to be a good choice. For the first prototype, it can also serve as the visualization backend through gnuplot.
+
+
 
 
