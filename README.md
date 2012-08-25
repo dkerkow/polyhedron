@@ -10,4 +10,7 @@ We are also looking for interested programmers with GIS background as well as in
 Structure
 ---------
 
+We think of polyhedron as a server, that manages users and project accounts, and gives the user the ability to manage the geodata that are stored in a PostGIS DB.
+
+
 
