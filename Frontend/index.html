@@ -8,7 +8,7 @@
 	<!-- Basic Page Needs
   ================================================== -->
 	<meta charset="utf-8">
-	<title>Your Page Title Here :)</title>
+	<title>polyhedron</title>
 	<meta name="description" content="">
 	<meta name="author" content="">
 
@@ -37,17 +37,24 @@
 </head>
 <body>
 	<div id="login">
-		<form action="/login">
-			
+		<form action="/login" method="post">
+		<h1>polyhedron</h1>
+		Please Login To Your Account!
 			<!-- Label and text input -->
 	  	<label for="regularInput">E-Mail</label>
-	  	<input type="text" id="email" />
+	  	<input type="text" id="email" name="username" />
 	  	
 	  		<!-- Label and text input -->
 	  	<label for="regularInput">Password</label>
-	  	<input type="text" id="pwd" />
+	  	<input type="text" id="pwd" name="password" />
 		 
-		<button type="submit">Submit Form</button> 
+		<button type="submit">Submit Form</button>
+		<div>
+			Create an Account!
+		</div>
+		<div> 
+			Forgot Your Password?
+		</div>
 		</form>
 	</div>
 
