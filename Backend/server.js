@@ -21,7 +21,7 @@ passport.use(new LocalStrategy(
 	function(username, password, done) {
 		console.log(username);
 		console.log(password);
-		done(null, "test");
+		done("Kann ich noch nicht.", false);
 	})
 );
 
@@ -30,10 +30,15 @@ app.get('/loginfailed', function (req, res) {
 	res.send("Login failed.");
 });
 
+
+app.get('/loginsucceeded', function (req, res) {
+	res.send("Login succeeded.");
+});
+
 app.get('/login', 
 	passport.authenticate('local', { failureRedirect: '/loginfailed' }),
 	function (req, res) {
-		res.redirect('/loginfailed');	
+		res.redirect('/loginsucceeded');	
 	});
 
 // Launch server
