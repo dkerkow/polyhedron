@@ -34,7 +34,7 @@ function UserDB(configuration) {
 				var user = users[0];
 
 				var hash = _hash(email + password + user.salt);
-				if(user.hash == hash)
+				if(user.hash === hash)
 					done(null, user);
 				else
 					done("User not found or incorrect password.", null);
