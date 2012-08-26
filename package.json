@@ -5,6 +5,7 @@
   "private": true,
   "dependencies": {
     "express": "3.0.0rc3",
+    "mongojs": "0.4.3",
     "passport": "0.1.12",
     "passport-local": "0.1.6",
     "jade": "0.27.2"
