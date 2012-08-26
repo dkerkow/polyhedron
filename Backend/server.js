@@ -8,7 +8,7 @@ var application_root = __dirname,
 // Global constants.
 var config = {
 	// Maximum age of session in ms.
-	MAX_SESSION_AGE: 5000
+	MAX_SESSION_AGE: 300000
 };
 
 // User database initialization.
