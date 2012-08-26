@@ -38,23 +38,20 @@
 <body>
 	<div id="login">
 		<form action="/login" method="post">
-		<h1>polyhedron</h1>
-		Please Login To Your Account!
+		<h1>Sign Up</h1>
+		Tell us something about yourself.
 			<!-- Label and text input -->
+	  	<label for="regularInput">Name</label>
+	  	<input type="text" id="name" name="username" />
+
 	  	<label for="regularInput">E-Mail</label>
-	  	<input type="text" id="email" name="username" />
-	  	
-	  		<!-- Label and text input -->
-	  	<label for="regularInput">Password</label>
+	  	<input type="text" id="email" name="email" />
+
+	  	<label for="regularInput">Passwort</label>
 	  	<input type="text" id="pwd" name="password" />
 		 
-		<button type="submit">Submit Form</button>
-		<div>
-			<a href = "new_user_form.html"> Create an Account!</a>
-		</div>
-		<div> 
-			Forgot Your Password?
-		</div>
+		<button type="submit">Submit</button>
+		<button type="cancel">Cancel</button>
 		</form>
 	</div>
 
