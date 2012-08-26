@@ -1,9 +1,9 @@
-var     application_root        = __dirname,
-	userdb 			= require("./modules/userdb"),
-	express 		= require("express"),
-	path 			= require("path"),
-	passport 		= require("passport"),
-	LocalStrategy 		= require('passport-local').Strategy;
+var     application_root	= __dirname,
+		userdb 				= require("./modules/userdb"),
+		express 			= require("express"),
+		path 				= require("path"),
+		passport 			= require("passport"),
+		LocalStrategy 		= require('passport-local').Strategy;
 
 // Global constants.
 var config = {
@@ -27,7 +27,7 @@ app.configure(function () {
 	app.use(passport.initialize());
 	app.use(passport.session());
 	app.use(app.router);
-	app.use(express.static(path.join(application_root, "../Frontend")));
+	app.use(express.static(path.join(application_root, "public")));
 	app.use(express.errorHandler({ dumpExceptions: true, showStack: true }));
 });
 
