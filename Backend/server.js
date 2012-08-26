@@ -1,12 +1,17 @@
 var application_root = __dirname,
-	userdb = require("userdb");
-	express = require("express"),
-	path = require("path"),
-	passport = require("passport"),
-	LocalStrategy = require('passport-local').Strategy;
-var app = express();
-var UserDb = userdb.UserDb;
-var SessionDb = userdb.SessionDb;
+	userdb 			= require("./userdb"),
+	express 		= require("express"),
+	path 			= require("path"),
+	passport 		= require("passport"),
+	LocalStrategy 	= require('passport-local').Strategy;
+
+	//console.log("userdb", userdb);
+
+var app 		= express();
+var UserDb 		= userdb.UserDB;
+var SessionDb 	= userdb.SessionDb;
+
+
 
 // Config.
 app.configure(function () {
@@ -27,7 +32,7 @@ app.configure(function () {
 // Passport config.
 passport.use(new LocalStrategy(
 	function(username, password, done) {	
-		var user = UserDb.lookup(username, hash);
+		var user = UserDB.lookup(username, hash);
 		if(!user)
 			done("User not found.", null);
 		else
