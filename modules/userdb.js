@@ -26,9 +26,11 @@ function UserDB(configuration) {
 	// Find user by email and verify password (hash).
 	// NOTE: Never tell the user which of username or password was incorrect.
 	this.lookupUser = function(email, password, done) {
-		this._connection.users.find({"email": email}, function(err, users) {
-			if ( err || !users || (users.length == 0)) {
-				done("User not found or incorrect password.", null);
+		this._connection.users.find({"email": email}, function(err, users) {		
+			if ( err || !users ) {
+				done(err);
+			} else if (users.length == 0) {
+				done(null, false, { message: "User not found or incorrect password." });
 			} else {
 				// TODO: make email UNIQUE in database.
 				var user = users[0];
@@ -36,8 +38,8 @@ function UserDB(configuration) {
 				var hash = _hash(email + password + user.salt);
 				if(user.hash === hash)
 					done(null, user);
-				else
-					done("User not found or incorrect password.", null);
+				else 
+					done(null, false, { message: "User not found or incorrect password."});	
   			}
 		});
 	};
@@ -47,11 +49,14 @@ function UserDB(configuration) {
 		var con = this._connection;
 
 		crypto.randomBytes(256, function(ex, salt) {
-			if (ex) 
-				done(err);
+			if (ex) {
+				console.log(ex);
+				done(false);
+				return;
+			}
 
 			var hash = _hash(email + password + salt);
-			con.users.save({"name": name, "email": email, "hash": hash, "salt": salt}, function(err, saved){
+			con.users.save({"name": name, "email": email, "hash": hash, "salt": salt}, function(err, saved) {
 				if ( err || !saved )
 					done(false);
 				else
@@ -67,9 +72,11 @@ function UserDB(configuration) {
 		var max_session_age = this._configuration.MAX_SESSION_AGE;
 
 		con.sessions.find({"sessionid": sessionid}, function(err, sessions){
-			if (err || !sessions || (sessions.length == 0))
-				done("Invalid session id.", null);
-			else {
+			if (err) {
+				done(err);
+			} else if (!sessions || sessions.length == 0) {
+				done(null, false, { message: "Invalid session id." });
+			} else {
 				// TODO: Make sessionid UNIQUE in database.
 				var session = sessions[0];
 
@@ -80,7 +87,7 @@ function UserDB(configuration) {
 							console.log("Could not remove session from database!");
 						}
 					});
-					done("Session has expired.", null);
+					done(null, false, { message: "Session has expired." });
 				} else {
 					session.ts = now;
 					con.sessions.update({"_id": session._id}, session, false, function(err, updated) {
@@ -110,12 +117,10 @@ function UserDB(configuration) {
 			}
 
 			con.sessions.save(session, function(err, saved) {
-				if( err || !saved ) {
-					done("Could not establish session.", null);
-				}
-	  			else {	
+				if ( err || !saved )
+					done(err);
+	  			else
 					done(null, session.sessionid);
-				}
 			});
 		});
 	};

@@ -28,7 +28,8 @@ app.configure(function () {
 	app.use(passport.session());
 	app.use(app.router);
 	app.use(express.static(path.join(application_root, "public")));
-	app.use(express.errorHandler({ dumpExceptions: true, showStack: true }));
+	app.use(function(err, req, res, next) { render_error(err, res); })
+	app.set('view engine', 'jade');
 });
 
 // Passport config.
@@ -46,35 +47,53 @@ passport.deserializeUser(function(sid, done) {
 	UserDb.lookupSession(sid, done);
 });
 
-// Express API.
-app.get('/loginfailed', function (req, res) {
-	res.send("Login failed.");
-});
+// Error handling.
+var error_msgs = {
+	403: "You shall not go there.",
+	404: "Wtf?",
+	500: "I am not feeling well."
+}
 
-app.post('/login', 
-	passport.authenticate('local', { failureRedirect: '/loginfailed' }),
-	function (req, res) {
-		res.redirect('/home');	
+function render_error(err, res, num) {
+	var status = num ? num : 500;
+	var message = err ? err : error_msgs[status];
+	res.status(status).render('error', { error: status, msg: message })
+}
+
+// Express API.
+app.post('/api/login', 
+	function (req, res, next) {
+		passport.authenticate('local', 
+			function (err, user, info) {
+				if (err) 
+					return next(err);
+
+				if (!user) 
+					return render_error(null, res, 403);
+
+				res.render('home', {"user": user});
+			}
+		)(req, res, next);
+	});
+
+app.post('/api/register',
+	function (req, res, next) {
+		UserDb.addUser(req.body.username, req.body.email, req.body.password, function(success) {
+			if(!success) {
+				render_error(null, res, 500);
+			} else {
+				res.redirect('/index.html');
+			}
+		});
 	});
 
 app.get('/home',
-	function (req, res) {
+	function (req, res, next) {
 		// req.user is set if session is established!
 		if(!req.user)
-			res.send("Not authenticated.");
-		else		
-			res.send("Home.");	
-	});
-
-app.post('/register',
-	function (req, res) {
-		UserDb.addUser(req.body.username, req.body.email, req.body.password, function(success) {
-			if(!success) {
-				res.send("Failed to register.");
-			} else {
-				res.redirect("/index.html");
-			}
-		});
+			render_error(null, res, 403);	
+		else
+			res.render('home', {"user": user});	
 	});
 
 // Launch server
