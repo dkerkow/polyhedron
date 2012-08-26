@@ -9,7 +9,8 @@ var application_root = __dirname,
 var config = {
 	// Maximum age of session in ms.
 	MAX_SESSION_AGE: 300000,
-	COOKIE_SECRET: "503a3d9f7244655510000001"
+	COOKIE_SECRET: "503a3d9f7244655510000001",
+	HTTP_PORT: 4242
 };
 
 // User database initialization.
@@ -77,4 +78,4 @@ app.post('/register',
 	});
 
 // Launch server
-app.listen(4242);
+app.listen(config.HTTP_PORT);
