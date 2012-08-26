@@ -27,28 +27,29 @@ app.configure(function () {
 
 // Passport config.
 passport.use(new LocalStrategy(
-	function(username, password, done) {	
-		var user = UserDB.lookup(username, hash);
-		if(!user)
-			done("User not found.", null);
-		else
-			done(null, user);
+	function(username, hash, done) {	
+		UserDb.lookupUser(username, hash, function(err, user) {
+			if(!user)
+				done("User not found.", null);
+			else
+				done(null, user);
+		});
 	})
 );
 
 passport.serializeUser(function(user, done) {
-	// TODO: Create random session id.
-	var sid = (new Date()).getTime();
-	SessionDb.store(sid, user.id);
-	done(null, sid);
+	UserDb.createSession(user.id, function(err, sid) {
+		done(null, sid);
+	});
 });
 
 passport.deserializeUser(function(sid, done) {
-	var user = SessionDb.lookup(sid);
-	if(!user)
-		done("Session not found.", null);
-	else
-		done(null, user);
+	UserDb.lookupSession(sid, function(err, user) {
+		if(!user)
+			done("Session not found.", null);
+		else
+			done(null, user);
+	});
 });
 
 // API.
