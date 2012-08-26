@@ -1,36 +1,66 @@
+var mongojs = require('mongojs');
+
 function UserDB() {
 
-	this.connection; 
+	this.connection = null; 
 
 	// Verbindungsaufbau zu MongoDB
 	this.connect = function(){
-		var db = require('mongojs').connect('userDB', ['users', 'session']);
+		this.connection = mongojs.connect('userDB', ['users', 'sessions']);
 		console.log("Connected to database server.")
-
 	};
 
 	// Userdaten/password -> user zurückgeben und Fehlermeldung (0)
-	this.lookup = function(email, password){
+	this.lookupUser = function(email, password, done){
 		this.connection.users.find({email: email, password: password}, function(err, users){
-			if( err || !users) {
-				console.log("User does not exist or wrong password.");
-				return 0;
-			}
-  			else {
-  				users.forEach( function(user) {
-    				console.log(user);
-    				return user;
-  				});
+			if ( err || !users || (users.length == 0)) {
+				console.log("User does not exist or wrong password: " + err);
+				done(err, null);
+			} else {
+				// TODO ...
+				var user = users[0];
+    				done(null, user);
   			}
+		});
+	};
+
+	// Fügt einen Benutzer zur DB hinzu
+	this.addUser =  function(email, password, done){
+		this.connection.users.save({"email": email, "password": password}, function(err, saved){
+			if ( err || !saved ) { 
+				console.log("User not saved.");
+				done(err);
+			} else {
+				console.log("User saved.");
+				done(null);
+			}
+		});
+	}
+
+	this.lookupSession = function(sessionid, done) {
+		this.connection.sessions.find({"sessionid": sessionid}, function(err, sessions){
+			if (err || !sessions || (sessions.length == 0)) {
+				console.log("Session not found.");
+				done(err, null);
+			} else {
+				// TODO ...
+				var session = sessions[0];
+  				done(null, session);
+			}
 		});
 
 	};
 
-	// Fügt einen Benutzer zur DB hinzu
-	this.addUser =  function(email, password){
-		this.connection.users.save({"email": eamil, "password:": password}, function(err, saved){
-			if( err || !saved ) console.log("User not saved");
-  			else console.log("User saved");
+	this.createSession = function(userid, done) {
+		// TODO: Create truly random session id + timestamp.
+		var sessionid = (new Date()).getDate();
+		this.connection.sessions.save({"sessionid": sessionid, "userid": userid}, function(err, saved){
+			if( err || !saved ) {
+				done("Session not saved.", null);
+			}
+  			else {	
+				done(null, sessionid);
+			}
 		});
 	}
 };
