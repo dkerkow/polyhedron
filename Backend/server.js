@@ -5,13 +5,9 @@ var application_root = __dirname,
 	passport 		= require("passport"),
 	LocalStrategy 	= require('passport-local').Strategy;
 
-	//console.log("userdb", userdb);
-
 var app 		= express();
-var UserDb 		= userdb();
-var SessionDb 	= userdb.SessionDb;
-
-
+var UserDb 		= new userdb.UserDB();
+UserDb.connect();
 
 // Config.
 app.configure(function () {
