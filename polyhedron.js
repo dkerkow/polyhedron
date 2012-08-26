@@ -26,8 +26,8 @@ app.configure(function () {
 	app.use(express.session({secret: config.COOKIE_SECRET}));
 	app.use(passport.initialize());
 	app.use(passport.session());
-	app.use(app.router);
 	app.use(express.static(path.join(application_root, "public")));
+	app.use(app.router);
 	app.use(function(err, req, res, next) { render_error(err, res); })
 	app.set('view engine', 'jade');
 });
@@ -94,6 +94,11 @@ app.get('/home',
 			render_error(null, res, 403);	
 		else
 			res.render('home', {"user": user});	
+	});
+
+app.get('*',
+	function (req, res, next) {
+		render_error(null, res, 404);
 	});
 
 // Launch server
