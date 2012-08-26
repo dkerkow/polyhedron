@@ -21,7 +21,7 @@
 	<link rel="stylesheet" href="stylesheets/base.css">
 	<link rel="stylesheet" href="stylesheets/skeleton.css">
 	<link rel="stylesheet" href="stylesheets/layout.css">
-	<link rel="stylesheet" href="stylesheets/main.css"
+	<link rel="stylesheet" href="stylesheets/main.css">
 
 	<!--[if lt IE 9]>
 		<script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
@@ -36,22 +36,26 @@
 
 </head>
 <body>
-	<div id="login">
-		<form action="/login" method="post">
+	<div id="register">
+		<form action="/register" method="post">
 		<h1>Sign Up</h1>
 		Tell us something about yourself.
-			<!-- Label and text input -->
 	  	<label for="regularInput">Name</label>
 	  	<input type="text" id="name" name="username" />
 
 	  	<label for="regularInput">E-Mail</label>
 	  	<input type="text" id="email" name="email" />
 
-	  	<label for="regularInput">Passwort</label>
+	  	<label for="regularInput">Password</label>
 	  	<input type="text" id="pwd" name="password" />
+
+	  	<label for="regularInput">Repeat Password</label>
+	  	<input type="text" id="rpwd" name="rpassword" />
 		 
 		<button type="submit">Submit</button>
+		
 		<button type="cancel">Cancel</button>
+		
 		</form>
 	</div>
 

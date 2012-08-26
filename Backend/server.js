@@ -72,6 +72,16 @@ app.get('/home',
 			res.send("Home.");	
 	});
 
+app.post('/register',
+function (req, res) {
+		if (req.password.equals(req.rpassword)) {
+		userdb.addUser(req.name, req.email, req.password, req.rpassword);
+		res.redirect("/login");
+		}
+		else{
+			console.log ('Password check failed! Try again.');
+		)};
+	});
 
 // Launch server
 app.listen(4242);
