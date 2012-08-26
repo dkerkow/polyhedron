@@ -8,7 +8,7 @@ var application_root = __dirname,
 	//console.log("userdb", userdb);
 
 var app 		= express();
-var UserDb 		= userdb.UserDB;
+var UserDb 		= userdb();
 var SessionDb 	= userdb.SessionDb;
 
 
@@ -60,7 +60,7 @@ app.get('/loginfailed', function (req, res) {
 	res.send("Login failed.");
 });
 
-app.get('/login', 
+app.post('/login', 
 	passport.authenticate('local', { failureRedirect: '/loginfailed' }),
 	function (req, res) {
 		res.redirect('/home');	
