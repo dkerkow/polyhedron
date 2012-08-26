@@ -5,54 +5,46 @@ var application_root = __dirname,
 	passport 		= require("passport"),
 	LocalStrategy 		= require('passport-local').Strategy;
 
-var app 		= express();
-var UserDb 		= new userdb.UserDB();
-UserDb.connect();
+// Global constants.
+var config = {
+	// Maximum age of session in ms.
+	MAX_SESSION_AGE: 5000
+};
 
-// Config.
+// User database initialization.
+var UserDb 		= new userdb.UserDB(config);
+if(!UserDb.connect()) return;
+
+// Express config.
+var app 		= express();
 app.configure(function () {
 	app.use(express.bodyParser());
 	app.use(express.methodOverride());
-	app.use(express.cookieParser("SOMESECRET"));
-	app.use(express.session({
-		secret: "SOMESECRET",
-      	}));
+	app.use(express.cookieParser("503a3d9f7244655510000001"));
+	app.use(express.session({secret: "503a3d9f7244655510000001"}));
 	app.use(passport.initialize());
-	app.use(passport.session());	
+	app.use(passport.session());
 	app.use(app.router);
 	app.use(express.static(path.join(application_root, "../Frontend")));
 	app.use(express.errorHandler({ dumpExceptions: true, showStack: true }));
 });
 
-
 // Passport config.
 passport.use(new LocalStrategy(
-	function(username, hash, done) {	
-		UserDb.lookupUser(username, hash, function(err, user) {
-			if(!user)
-				done("User not found.", null);
-			else
-				done(null, user);
-		});
+	function(username, password, done) {	
+		UserDb.lookupUser(username, password, done);
 	})
 );
 
 passport.serializeUser(function(user, done) {
-	UserDb.createSession(user, function(err, sid) {
-		done(null, sid);
-	});
+	UserDb.createSession(user, done);
 });
 
 passport.deserializeUser(function(sid, done) {
-	UserDb.lookupSession(sid, function(err, user) {
-		if(!user)
-			done("Session not found.", null);
-		else
-			done(null, user);
-	});
+	UserDb.lookupSession(sid, done);
 });
 
-// API.
+// Express API.
 app.get('/loginfailed', function (req, res) {
 	res.send("Login failed.");
 });
@@ -73,14 +65,14 @@ app.get('/home',
 	});
 
 app.post('/register',
-function (req, res) {
-		if (req.password.equals(req.rpassword)) {
-		userdb.addUser(req.name, req.email, req.password, req.rpassword);
-		res.redirect("/login");
-		}
-		else{
-			console.log ('Password check failed! Try again.');
-		)};
+	function (req, res) {
+		UserDb.addUser(req.body.username, req.body.email, req.body.password, function(success) {
+			if(!success) {
+				res.send("Failed to register.");
+			} else {
+				res.redirect("/index.html");
+			}
+		});
 	});
 
 // Launch server

@@ -1,68 +1,124 @@
 var mongojs = require('mongojs');
+var crypto  = require('crypto');
 
-function UserDB() {
+// Creates a SHA1 hash of data and returns its base64 representation.
+function _hash(data) {
+	return crypto.createHash("sha1").update(data).digest("base64");
+}
 
-	this.connection = null; 
+function UserDB(configuration) {
 
-	// Verbindungsaufbau zu MongoDB
+	this._connection = null; 
+	this._configuration = configuration;
+
 	this.connect = function(){
-		this.connection = mongojs.connect('userDB', ['users', 'sessions']);
-		console.log("Connected to database server.")
+		this._connection = mongojs.connect('userDB', ['users', 'sessions']);
+		if(!this._connection) {
+			console.log("Could not connect to database server.");
+			return false;
+
+		} else {
+			console.log("Connected to database server.");
+			return true;
+		}
 	};
 
-	// Userdaten/password -> user zurückgeben und Fehlermeldung (0)
-	this.lookupUser = function(email, password, done){
-		this.connection.users.find({email: email, password: password}, function(err, users){
+	// Find user by email and verify password (hash).
+	// NOTE: Never tell the user which of username or password was incorrect.
+	this.lookupUser = function(email, password, done) {
+		this._connection.users.find({"email": email}, function(err, users) {
 			if ( err || !users || (users.length == 0)) {
-				console.log("User does not exist or wrong password: " + err);
-				done(err, null);
+				done("User not found or incorrect password.", null);
 			} else {
-				// TODO ...
+				// TODO: make email UNIQUE in database.
 				var user = users[0];
-    				done(null, user);
+
+				var hash = _hash(email + password + user.salt);
+				if(user.hash == hash)
+					done(null, user);
+				else
+					done("User not found or incorrect password.", null);
   			}
 		});
 	};
 
-	// Fügt einen Benutzer zur DB hinzu
-	this.addUser =  function(email, password, done){
-		this.connection.users.save({"email": email, "password": password}, function(err, saved){
-			if ( err || !saved ) { 
-				console.log("User not saved.");
+	// Add user to database with salted email+password hash.
+	this.addUser =  function(name, email, password, done){
+		var con = this._connection;
+
+		crypto.randomBytes(256, function(ex, salt) {
+			if (ex) 
 				done(err);
-			} else {
-				console.log("User saved.");
-				done(null);
-			}
-		});
-	}
 
-	this.lookupSession = function(sessionid, done) {
-		this.connection.sessions.find({"sessionid": sessionid}, function(err, sessions){
-			if (err || !sessions || (sessions.length == 0)) {
-				console.log("Session not found.");
-				done(err, null);
-			} else {
-				// TODO ...
-				var session = sessions[0];
-  				done(null, session);
-			}
+			var hash = _hash(email + password + salt);
+			con.users.save({"name": name, "email": email, "hash": hash, "salt": salt}, function(err, saved){
+				if ( err || !saved )
+					done(false);
+				else
+					done(true);
+			});
 		});
-
 	};
 
-	this.createSession = function(user, done) {
-		// TODO: Create truly random session id + timestamp.
-		var sessionid = (new Date()).getDate();
-		this.connection.sessions.save({"sessionid": sessionid, "userid": user.id, "email": user.email}, function(err, saved){
-			if( err || !saved ) {
-				done("Session not saved.", null);
-			}
-  			else {	
-				done(null, sessionid);
+	// Find session by sessionid and verify that it has not expired.
+	// If it is valid, update timestamp.
+	this.lookupSession = function(sessionid, done) {
+		var con = this._connection;
+		var max_session_age = this._configuration.MAX_SESSION_AGE;
+
+		con.sessions.find({"sessionid": sessionid}, function(err, sessions){
+			if (err || !sessions || (sessions.length == 0))
+				done("Invalid session id.", null);
+			else {
+				// TODO: Make sessionid UNIQUE in database.
+				var session = sessions[0];
+
+				var now = new Date().getTime();
+				if((now - session.ts) > max_session_age) {
+					con.sessions.remove({"sessionid": session.sessionid}, function(err, removed) {
+						if ( err || !removed ) { 
+							console.log("Could not remove session from database!");
+						}
+					});
+					done("Session has expired.", null);
+				} else {
+					session.ts = now;
+					con.sessions.update({"_id": session._id}, session, false, function(err, updated) {
+						if ( err || !updated ) { 
+							console.log("Could not update session timestamp in database!");
+						}
+					});
+					done(null, session);
+				}
+  					
 			}
 		});
-	}
+	};
+
+	// Create a new session with a unique sessionid.
+	this.createSession = function(user, done) {
+		var con = this._connection;
+
+		crypto.randomBytes(256, function(ex, entropy) {
+			if (ex) 
+				done(err);
+
+			var session = {
+				"sessionid": _hash(entropy), 
+				"email": user.email, 
+				"ts": new Date().getTime()
+			}
+
+			con.sessions.save(session, function(err, saved) {
+				if( err || !saved ) {
+					done("Could not establish session.", null);
+				}
+	  			else {	
+					done(null, session.sessionid);
+				}
+			});
+		});
+	};
 };
 
 module.exports.UserDB = UserDB;
