@@ -8,7 +8,8 @@ var application_root = __dirname,
 // Global constants.
 var config = {
 	// Maximum age of session in ms.
-	MAX_SESSION_AGE: 300000
+	MAX_SESSION_AGE: 300000,
+	COOKIE_SECRET: "503a3d9f7244655510000001"
 };
 
 // User database initialization.
@@ -20,8 +21,8 @@ var app 		= express();
 app.configure(function () {
 	app.use(express.bodyParser());
 	app.use(express.methodOverride());
-	app.use(express.cookieParser("503a3d9f7244655510000001"));
-	app.use(express.session({secret: "503a3d9f7244655510000001"}));
+	app.use(express.cookieParser(config.COOKIE_SECRET));
+	app.use(express.session({secret: config.COOKIE_SECRET}));
 	app.use(passport.initialize());
 	app.use(passport.session());
 	app.use(app.router);
