@@ -1,5 +1,5 @@
-var application_root = __dirname,
-	userdb 			= require("./userdb"),
+var     application_root        = __dirname,
+	userdb 			= require("./modules/userdb"),
 	express 		= require("express"),
 	path 			= require("path"),
 	passport 		= require("passport"),
