@@ -51,10 +51,10 @@ function UserDB() {
 
 	};
 
-	this.createSession = function(userid, done) {
+	this.createSession = function(user, done) {
 		// TODO: Create truly random session id + timestamp.
 		var sessionid = (new Date()).getDate();
-		this.connection.sessions.save({"sessionid": sessionid, "userid": userid}, function(err, saved){
+		this.connection.sessions.save({"sessionid": sessionid, "userid": user.id, "email": user.email}, function(err, saved){
 			if( err || !saved ) {
 				done("Session not saved.", null);
 			}

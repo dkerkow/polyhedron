@@ -3,7 +3,7 @@ var application_root = __dirname,
 	express 		= require("express"),
 	path 			= require("path"),
 	passport 		= require("passport"),
-	LocalStrategy 	= require('passport-local').Strategy;
+	LocalStrategy 		= require('passport-local').Strategy;
 
 var app 		= express();
 var UserDb 		= new userdb.UserDB();
@@ -38,7 +38,7 @@ passport.use(new LocalStrategy(
 );
 
 passport.serializeUser(function(user, done) {
-	UserDb.createSession(user.id, function(err, sid) {
+	UserDb.createSession(user, function(err, sid) {
 		done(null, sid);
 	});
 });
@@ -65,7 +65,7 @@ app.post('/login',
 
 app.get('/home',
 	function (req, res) {
-		console.log(req.user);
+		// req.user is set if session is established!
 		if(!req.user)
 			res.send("Not authenticated.");
 		else		
